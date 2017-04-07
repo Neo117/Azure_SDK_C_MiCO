@@ -7,7 +7,7 @@
 
 #define MQTT_SUB_NAME "19b2b220150911e7a554fa163e876164/8d01f204150911e7a554fa163e876164/5cc06e7215db11e7a554fa163e876164/status"
 
-void disconnectCallbackHandler( AWS_IoT_Client *pClient, void *data )
+void disconnectCallbackHandler( MQTT_Client *pClient, void *data )
 {
     IoT_Error_t rc = FAILURE;
     mqtt_log("MQTT Disconnect");
@@ -36,7 +36,7 @@ void disconnectCallbackHandler( AWS_IoT_Client *pClient, void *data )
     }
 }
 
-void iot_subscribe_callback_handler( AWS_IoT_Client *pClient, char *topicName,
+void iot_subscribe_callback_handler( MQTT_Client *pClient, char *topicName,
                                      uint16_t topicNameLen,
                                      IoT_Publish_Message_Params *params,
                                      void *pData )
@@ -54,7 +54,7 @@ static void mqtt_sub_pub_main( mico_thread_arg_t arg )
     char clientid[40];
     char cPayload[100];
     int i = 0;
-    AWS_IoT_Client client;
+    MQTT_Client client;
     IoT_Client_Init_Params mqttInitParams = iotClientInitParamsDefault;
     IoT_Client_Connect_Params connectParams = iotClientConnectParamsDefault;
     IoT_Publish_Message_Params paramsQOS0;
