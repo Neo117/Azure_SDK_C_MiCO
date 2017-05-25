@@ -1,15 +1,26 @@
-#include "mico_rtos.h"
-#include "debug.h"
-#include "mqtt_config.h"
+#include "mico.h"
+#include "mico_app_define.h"
 #include "mqtt_client_interface.h"
 
 #define mqtt_log(M, ...) custom_log("mqtt", M, ##__VA_ARGS__)
 
-#define MQTT_SUB_NAME "19b2b220150911e7a554fa163e876164/8d01f204150911e7a554fa163e876164/5cc06e7215db11e7a554fa163e876164/status"
+char *mqtt_client_id_get( char clientid[30] )
+{
+    uint8_t mac[6];
+    char mac_str[13];
+
+    mico_wlan_get_mac_address( mac );
+    sprintf( mac_str, "%02X%02X%02X%02X%02X%02X",
+             mac[0],
+             mac[1], mac[2], mac[3], mac[4], mac[5] );
+    sprintf( clientid, "MiCO_%s", mac_str );
+
+    return clientid;
+}
 
 void disconnectCallbackHandler( MQTT_Client *pClient, void *data )
 {
-    IoT_Error_t rc = FAILURE;
+    IoT_Error_t rc = MQTT_FAILURE;
     mqtt_log("MQTT Disconnect");
 
     if ( NULL == pClient )
@@ -49,7 +60,7 @@ void iot_subscribe_callback_handler( MQTT_Client *pClient, char *topicName,
 
 static void mqtt_sub_pub_main( mico_thread_arg_t arg )
 {
-    IoT_Error_t rc = FAILURE;
+    IoT_Error_t rc = MQTT_FAILURE;
 
     char clientid[40];
     char cPayload[100];
@@ -73,7 +84,6 @@ static void mqtt_sub_pub_main( mico_thread_arg_t arg )
     mqttInitParams.tlsHandshakeTimeout_ms = 5000;
     mqttInitParams.disconnectHandler = disconnectCallbackHandler;
     mqttInitParams.disconnectHandlerData = NULL;
-    mqttInitParams.isBlockOnThreadLockEnabled = true;
 #ifdef MQTT_USE_SSL
     mqttInitParams.pRootCALocation = MQTT_ROOT_CA_FILENAME;
     mqttInitParams.pDeviceCertLocation = MQTT_CERTIFICATE_FILENAME;
@@ -91,7 +101,7 @@ static void mqtt_sub_pub_main( mico_thread_arg_t arg )
 #endif
 
     rc = mqtt_init( &client, &mqttInitParams );
-    if ( SUCCESS != rc )
+    if ( MQTT_SUCCESS != rc )
     {
         mqtt_log("aws_iot_mqtt_init returned error : %d ", rc);
         goto exit;
@@ -100,8 +110,8 @@ static void mqtt_sub_pub_main( mico_thread_arg_t arg )
     connectParams.keepAliveIntervalInSec = 30;
     connectParams.isCleanSession = true;
     connectParams.MQTTVersion = MQTT_3_1_1;
-    connectParams.pClientID = mqtt_client_id_get( clientid );
-    connectParams.clientIDLen = (uint16_t) strlen( mqtt_client_id_get( clientid ) );
+    connectParams.pClientID = MQTT_CLIENT_ID;
+    connectParams.clientIDLen = (uint16_t) strlen( MQTT_CLIENT_ID );
     connectParams.isWillMsgPresent = false;
     connectParams.pUsername = MQTT_USERNAME;
     connectParams.usernameLen = strlen(MQTT_USERNAME);
@@ -110,7 +120,7 @@ static void mqtt_sub_pub_main( mico_thread_arg_t arg )
 
     mqtt_log("Connecting...");
     rc = mqtt_connect( &client, &connectParams );
-    if ( SUCCESS != rc )
+    if ( MQTT_SUCCESS != rc )
     {
         mqtt_log("Error(%d) connecting to %s:%d", rc, mqttInitParams.pHostURL, mqttInitParams.port);
         goto exit;
@@ -119,7 +129,7 @@ static void mqtt_sub_pub_main( mico_thread_arg_t arg )
     mqtt_log("Subscribing...");
     rc = mqtt_subscribe( &client, MQTT_SUB_NAME, strlen( MQTT_SUB_NAME ), QOS0,
                          iot_subscribe_callback_handler, NULL );
-    if ( SUCCESS != rc )
+    if ( MQTT_SUCCESS != rc )
     {
         mqtt_log("Error subscribing : %d ", rc);
         goto exit;
@@ -162,11 +172,11 @@ static void mqtt_sub_pub_main( mico_thread_arg_t arg )
         if ( rc == MQTT_REQUEST_TIMEOUT_ERROR )
         {
             mqtt_log("QOS1 publish ack not received");
-            rc = SUCCESS;
+            rc = MQTT_SUCCESS;
         }
     }
 
-    if ( SUCCESS != rc )
+    if ( MQTT_SUCCESS != rc )
     {
         mqtt_log("An error occurred in the loop.\n");
     } else
@@ -181,7 +191,7 @@ static void mqtt_sub_pub_main( mico_thread_arg_t arg )
 OSStatus start_mqtt_sub_pub( void )
 {
 #ifdef MQTT_USE_SSL
-    uint32_t stack_size = 0x2000;
+    uint32_t stack_size = 0x3000;
 #else
     uint32_t stack_size = 0x1000;
 #endif
