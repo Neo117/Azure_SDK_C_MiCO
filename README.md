@@ -74,6 +74,50 @@
 	
 
 ```
+### 2.5 API说明
+
+### 3.1 IoT_Error_t mqtt_init(MQTT_Client *pClient, IoT_Client_Init_Params *pInitParams);
+
+|名称|`IoT_Error_t mqtt_init(MQTT_Client *pClient, IoT_Client_Init_Params *pInitParams);`|
+|:---|:---|
+|功能|`mqtt client初始化函数`|
+|参数|`pClient 指向MQTT对象 `|
+|参数|`pInitParams 指向MQtt连接参数的指针 `|
+|返回|`成功或失败的类型`|
+
+### 3.2 IoT_Error_t mqtt_connect(MQTT_Client *pClient, IoT_Client_Connect_Params *pConnectParams);
+
+|名称|`IoT_Error_t mqtt_connect(MQTT_Client *pClient, IoT_Client_Connect_Params *pConnectParams);`|
+|:---|:---|
+|功能|`MQTT连接函数`|
+|参数|`pClient 指向MQTT对象 `|
+|参数|`pConnectParams 指向MQtt连接参数的指针`|
+|返回|`成功或失败的类型`|
+
+### 3.3IoT_Error_t mqtt_publish(MQTT_Client *pClient, const char *pTopicName, uint16_t topicNameLen,
+								 IoT_Publish_Message_Params *pParams);
+
+|名称|`IoT_Error_t mqtt_publish(MQTT_Client *pClient, const char *pTopicName, uint16_t topicNameLen,IoT_Publish_Message_Params *pParams);`|
+|:---|:---|
+|功能|`向一个主题发布MQTT消息 `|
+|参数|`pClient 指向MQTT对象 `|
+|参数|`pTopicName 发送的主题名字 `|
+|参数|`topicNameLen 主题名字的长度 `|
+|参数|`pParams 发布的消息内容 `|
+|返回|`成功或失败的类型`|
+
+### 3.4IoT_Error_t mqtt_subscribe(MQTT_Client *pClient, const char *pTopicName, uint16_t topicNameLen, QoS qos, pApplicationHandler_t pApplicationHandler, void *pApplicationHandlerData);
+
+|名称|`IoT_Error_t mqtt_subscribe(MQTT_Client *pClient, const char *pTopicName, uint16_t topicNameLen,QoS qos, pApplicationHandler_t pApplicationHandler, void *pApplicationHandlerData);`|
+|:---|:---|
+|功能|`订阅一个MQTT主题`|
+|参数|`pClient 指向MQTT对象 `|
+|参数|`pTopicName 将要订阅的主题名字 `|
+|参数|`topicNameLen 主题名字的长度 `|
+|参数|`argslen 服务请求数组参数长度 `|
+|参数|`pApplicationHandler_t 此订阅的处理函数 `|
+|参数|`pApplicationHandlerData 将数据作为参数传递给应用程序处理程序回调 `|
+|返回|`成功或失败的类型`|
 
 
 
