@@ -193,7 +193,7 @@ OSStatus start_mqtt_sub_pub( void )
 #ifdef MQTT_USE_SSL
     uint32_t stack_size = 0x3000;
 #else
-    uint32_t stack_size = 0x1000;
+    uint32_t stack_size = 0x2000;
 #endif
     return mico_rtos_create_thread( NULL, MICO_APPLICATION_PRIORITY, "mqtt", mqtt_sub_pub_main,
                                     stack_size,
