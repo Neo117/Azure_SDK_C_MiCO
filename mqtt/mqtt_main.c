@@ -118,12 +118,14 @@ static void mqtt_sub_pub_main( mico_thread_arg_t arg )
     connectParams.pPassword = MQTT_PASSWORD;
     connectParams.passwordLen = strlen(MQTT_PASSWORD);
 
+RECONN:
     mqtt_log("Connecting...");
     rc = mqtt_connect( &client, &connectParams );
     if ( MQTT_SUCCESS != rc )
     {
         mqtt_log("Error(%d) connecting to %s:%d", rc, mqttInitParams.pHostURL, mqttInitParams.port);
-        goto exit;
+        sleep(2);
+        goto RECONN;
     }
 
     mqtt_log("Subscribing...");
@@ -132,7 +134,7 @@ static void mqtt_sub_pub_main( mico_thread_arg_t arg )
     if ( MQTT_SUCCESS != rc )
     {
         mqtt_log("Error subscribing : %d ", rc);
-        goto exit;
+        goto RECONN;
     }
 
     mqtt_log("publish...");
@@ -158,9 +160,12 @@ static void mqtt_sub_pub_main( mico_thread_arg_t arg )
         } else if ( NETWORK_RECONNECTED == rc )
         {
             mqtt_log("Reconnect Successful");
+        } else if ( NETWORK_RECONNECT_TIMED_OUT_ERROR == rc )
+        {
+            goto RECONN;
         }
 
-        mqtt_log("-->sleep");
+        mqtt_log("-->sleep, rc:%d", rc);
 //        mico_rtos_thread_msleep( 500 );
         sprintf( cPayload, "%s : %d ", "hello from SDK QOS0", i++ );
         paramsQOS0.payloadLen = strlen( cPayload );
