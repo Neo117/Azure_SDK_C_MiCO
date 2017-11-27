@@ -18,34 +18,6 @@ char *mqtt_client_id_get( char clientid[30] )
     return clientid;
 }
 
-void disconnectCallbackHandler( MQTT_Client *pClient, void *data )
-{
-    IoT_Error_t rc = MQTT_FAILURE;
-    mqtt_log("MQTT Disconnect");
-
-    if ( NULL == pClient )
-    {
-        return;
-    }
-
-    IOT_UNUSED( data );
-
-    if ( mqtt_is_autoreconnect_enabled( pClient ) )
-    {
-        mqtt_log("Auto Reconnect is enabled, Reconnecting attempt will start now");
-    } else
-    {
-        mqtt_log("Auto Reconnect not enabled. Starting manual reconnect...");
-        rc = mqtt_attempt_reconnect( pClient );
-        if ( NETWORK_RECONNECTED == rc )
-        {
-            mqtt_log("Manual Reconnect Successful");
-        } else
-        {
-            mqtt_log("Manual Reconnect Failed - %d", rc);
-        }
-    }
-}
 
 void iot_subscribe_callback_handler( MQTT_Client *pClient, char *topicName,
                                      uint16_t topicNameLen,
@@ -76,13 +48,13 @@ static void mqtt_sub_pub_main( mico_thread_arg_t arg )
      *  #AWS_IOT_MQTT_MIN_RECONNECT_WAIT_INTERVAL
      *  #AWS_IOT_MQTT_MAX_RECONNECT_WAIT_INTERVAL
      */
-    mqttInitParams.enableAutoReconnect = true;
+    mqttInitParams.enableAutoReconnect = false;
     mqttInitParams.pHostURL = MQTT_HOST;
     mqttInitParams.port = MQTT_PORT;
     mqttInitParams.mqttPacketTimeout_ms = 20000;
     mqttInitParams.mqttCommandTimeout_ms = 20000;
     mqttInitParams.tlsHandshakeTimeout_ms = 5000;
-    mqttInitParams.disconnectHandler = disconnectCallbackHandler;
+    mqttInitParams.disconnectHandler = NULL;
     mqttInitParams.disconnectHandlerData = NULL;
 #ifdef MQTT_USE_SSL
     mqttInitParams.pRootCALocation = MQTT_ROOT_CA_FILENAME;
@@ -152,21 +124,16 @@ RECONN:
     {
         //Max time the yield function will wait for read messages
         rc = mqtt_yield( &client, 100 );
-        if ( NETWORK_ATTEMPTING_RECONNECT == rc )
+        if ( MQTT_SUCCESS != rc )
         {
             // If the client is attempting to reconnect we will skip the rest of the loop.
             mico_rtos_thread_sleep( 1 );
-            continue;
-        } else if ( NETWORK_RECONNECTED == rc )
-        {
-            mqtt_log("Reconnect Successful");
-        } else if ( NETWORK_RECONNECT_TIMED_OUT_ERROR == rc )
-        {
+            mqtt_log("mqtt disconnect");
+            mqtt_disconnect( &client );
             goto RECONN;
         }
 
         mqtt_log("-->sleep, rc:%d", rc);
-//        mico_rtos_thread_msleep( 500 );
         sprintf( cPayload, "%s : %d ", "hello from SDK QOS0", i++ );
         paramsQOS0.payloadLen = strlen( cPayload );
         mqtt_publish( &client, MQTT_SUB_NAME, strlen( MQTT_SUB_NAME ), &paramsQOS0 );
@@ -179,14 +146,6 @@ RECONN:
             mqtt_log("QOS1 publish ack not received");
             rc = MQTT_SUCCESS;
         }
-    }
-
-    if ( MQTT_SUCCESS != rc )
-    {
-        mqtt_log("An error occurred in the loop.\n");
-    } else
-    {
-        mqtt_log("Publish done\n");
     }
 
     exit:
