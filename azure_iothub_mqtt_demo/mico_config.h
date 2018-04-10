@@ -1,15 +1,15 @@
 /**
  ******************************************************************************
  * @file    mico_config.h
- * @author  William Xu
+ * @author  Renhe Li
  * @version V1.0.0
- * @date    05-May-2014
+ * @date    28-Dec-2016
  * @brief   This file provide constant definition and type declaration for MICO
  *          running.
  ******************************************************************************
  *
  *  The MIT License
- *  Copyright (c) 2014 MXCHIP Inc.
+ *  Copyright (c) 2016 MXCHIP Inc.
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -32,12 +32,17 @@
 
 #pragma once
 
-#define APP_INFO   "MiCO BASIC Demo"
+#define APP_INFO   "azure_iot_sdk_c_mico_MQTT Demo"
 
-#define FIRMWARE_REVISION   "MICO_BASIC_1_0"
+#define FIRMWARE_REVISION   "MICO_AZURE_1_0"
 #define MANUFACTURER        "MXCHIP Inc."
 #define SERIAL_NUMBER       "20140606"
-#define PROTOCOL            "com.mxchip.basic"
+#define PROTOCOL            "com.mxchip.spp"
+
+//#define CONFIG_MODE_EASYLINK                    (1)
+//#define CONFIG_MODE_SOFT_AP                     (2)
+//#define CONFIG_MODE_EASYLINK_WITH_SOFTAP        (3)
+//#define CONFIG_MODE_WAC                         (4)
 
 /************************************************************************
  * Application thread stack size */
@@ -47,7 +52,7 @@
  * Enable wlan connection, start easylink configuration if no wlan settings are existed */
 #define MICO_WLAN_CONNECTION_ENABLE
 
-#define MICO_CONFIG_MODE CONFIG_MODE_EASYLINK
+#define MICO_WLAN_CONFIG_MODE CONFIG_MODE_AWS
 
 #define EasyLink_TimeOut                60000 /**< EasyLink timeout 60 seconds. */
 
@@ -56,7 +61,8 @@
 
 /************************************************************************
  * Device enter MFG mode if MICO settings are erased. */
-//#define MFG_MODE_AUTO 
+//#define MFG_MODE_AUTO
+
 /************************************************************************
  * Command line interface */
 #define MICO_CLI_ENABLE  
@@ -70,6 +76,7 @@
 /************************************************************************
  * Add service _easylink._tcp._local. for discovery */
 //#define MICO_SYSTEM_DISCOVERY_ENABLE
+
 /************************************************************************
  * MiCO TCP server used for configuration and ota. */
 //#define MICO_CONFIG_SERVER_ENABLE
