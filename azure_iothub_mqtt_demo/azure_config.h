@@ -15,7 +15,7 @@
 /************************************************************************
  * Please get your IoT hub connection string from Azure portal, the string should be like this:
  * HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key> */
-const char* connectionString = "HostName=FogIoTDev.azure-devices.cn;DeviceId=3080TestDevice;SharedAccessKey=mjLb4RJxl+0HSHFEfzp0e21mj0JId2KSRH9VsoeJI2c=";
+const char* connectionString = "";
 
 typedef struct EVENT_INSTANCE_TAG
 {
